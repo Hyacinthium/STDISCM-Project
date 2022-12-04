@@ -8,8 +8,16 @@
 from PIL import Image
 from PIL import ImageEnhance
 from os import listdir
+import argparse
 
-
+# TODO 
+# - argparse 
+# - isolate two methods [functional, domain]
+# - pip freeze
+# - reference algo 2 ni sir digimap
+# - default { functional: 3, domain: 1 }
+# - default values for bright sharp contrast
+# - add save location, default would be current folder
 def img_enhance(bright, sharp, contrast, img):
     curr_image = ImageEnhance.Brightness(img)
     new_image = curr_image.enhance(bright)
@@ -32,7 +40,6 @@ def main():
     brightness = float(input("Brightness: "))
     sharpness = float(input("Sharpness: "))
     contrast = float(input("Contrast: "))
-
 
     for images in listdir(location):
         # check if the image ends with png or jpg or jpeg
