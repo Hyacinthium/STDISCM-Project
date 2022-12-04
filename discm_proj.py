@@ -7,7 +7,6 @@
 
 from PIL import Image
 from PIL import ImageEnhance
-import os
 from os import listdir
 
 
@@ -27,14 +26,15 @@ def img_enhance(bright, sharp, contrast, img):
 
 def main():
     
-    
+    # location = input("Input location of images: ")
     location = "C:/Users/leana/Documents/DISCM/project/images"
-    enhancing_time = int(input("How long will the program run? "))
-    brightness = int(input("Brightness: "))
-    sharpness = int(input("Sharpness: "))
-    contrast = int(input("Contrast: "))
+    enhancing_time = float(input("How long will the program run? "))
+    brightness = float(input("Brightness: "))
+    sharpness = float(input("Sharpness: "))
+    contrast = float(input("Contrast: "))
 
-    for images in os.listdir(location):
+
+    for images in listdir(location):
         # check if the image ends with png or jpg or jpeg
         if (images.endswith(".png") or images.endswith(".jpg") or images.endswith(".jpeg") or images.endswith(".gif")):
             # display
@@ -46,26 +46,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# image_loc = input("Input folder location: ")
-# enhancing_time = int(input("How long will the program run? "))
-# brightness = int(input("Brightness: "))
-# sharpness = int(input("Sharpness: "))
-# contrast = int(input("Contrast: "))
-
-# image_file = Image.open(image_loc)
-# image_file.show()
-
-# # brightness
-# curr_image = ImageEnhance.Brightness(image_file)
-# new_image = curr_image.enhance(brightness)
-
-# #sharpness
-# curr_image = ImageEnhance.Sharpness(new_image)
-# new_image = curr_image.enhance(sharpness)
-
-# #contrast
-# curr_image = ImageEnhance.Contrast(new_image)
-# new_image = curr_image.enhance(contrast)
-
-# new_image.show()
