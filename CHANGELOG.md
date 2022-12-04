@@ -1,2 +1,3 @@
+- [#2] - transferred img_enhance function to domain_enhancer.py, added gif_enhance, changed input to parser
 - [#1] - update folder structure
 - [#0] - init repo
