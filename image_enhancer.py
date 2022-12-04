@@ -10,6 +10,7 @@ from PIL import ImageEnhance
 import os
 from os import listdir
 import argparse
+import domain_enhancer
 
 # TODO 
 # - argparse 
@@ -19,6 +20,7 @@ import argparse
 # - default { functional: 3, domain: 1 }
 # - default values for bright sharp contrast
 # - add save location, default would be current folder
+# - multiple default for parser (?)
 
 def main():
     
@@ -37,10 +39,9 @@ def main():
     for images in listdir(args.location):
         # check if the image ends with png or jpg or jpeg
         if (images.endswith(".png") or images.endswith(".jpg") or images.endswith(".jpeg") or images.endswith(".gif")):
-            # display
             curr = Image.open(args.location + '/' + images)
             curr.show()
-            new_image = img_enhance(args.brightness, args.sharpness, args.contrast, curr)
+            new_image = domain_enhancer.img_enhance(args.brightness, args.sharpness, args.contrast, curr)
             new_image.show()
             print(images)
 
