@@ -8,6 +8,7 @@ enhanced_ctr = 0
 
 """ flags """
 timeout_flag = False
+done_flag = False
 
 """ semaphores """
 buffer_full = threading.Semaphore(0)
@@ -34,27 +35,31 @@ def enhance(bright, sharp, contrast, save_loc):
   global enhanced_ctr
   global done_flag
 
-  while not timeout_flag:
-    buffer_full.acquire()
-    with buffer_lock:
-      img = buffer.pop()
-
-    # Brightness
-    curr_image = ImageEnhance.Brightness(img)
-    enhanced_image = curr_image.enhance(bright)
-
-    # Sharpness
-    curr_image = ImageEnhance.Sharpness(enhanced_image)
-    enhanced_image = curr_image.enhance(sharp)
-
-    # Contrast
-    curr_image = ImageEnhance.Contrast(enhanced_image)
-    enhanced_image = curr_image.enhance(contrast)
-
-    if not timeout_flag:
-      with enhanced_ctr_lock:
+  while not timeout_flag and not done_flag:
+    with enhanced_ctr_lock:
+      if enhanced_ctr == 0: 
+        done_flag = True
+      else: 
         enhanced_ctr -= 1
-        done_flag = True if enhanced_ctr == 0 else False
+
+    if not done_flag:
+      buffer_full.acquire()
+      with buffer_lock:
+        img = buffer.pop()
+
+      # Brightness
+      curr_image = ImageEnhance.Brightness(img)
+      enhanced_image = curr_image.enhance(bright)
+
+      # Sharpness
+      curr_image = ImageEnhance.Sharpness(enhanced_image)
+      enhanced_image = curr_image.enhance(sharp)
+
+      # Contrast
+      curr_image = ImageEnhance.Contrast(enhanced_image)
+      enhanced_image = curr_image.enhance(contrast)
+
+      if not timeout_flag:
         enhanced_image.save(f"{save_loc}/{img.filename.rsplit('/', 1)[-1]}")
 
 def gif_enhance(bright, sharp, contrast, img):
@@ -70,7 +75,9 @@ def gif_enhance(bright, sharp, contrast, img):
 
 def produce(location):
   global enhanced_ctr
-  enhanced_ctr = len(os.listdir(location))
+  
+  with enhanced_ctr_lock:
+    enhanced_ctr = len(os.listdir(location))
 
   for file in os.listdir(location):
     if (

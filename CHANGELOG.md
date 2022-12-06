@@ -1,3 +1,4 @@
+- [#6] - enhancer threads now properly terminating and joining
 - [#5] - converted domain_enhancer.py to utilize threading
 - [#4] - added domain_enhancer import
 - [#2] - transferred img_enhance function to domain_enhancer.py, added gif_enhance, changed input to parser
