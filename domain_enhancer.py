@@ -5,6 +5,7 @@ from PIL import ImageEnhance
 """ global variables """
 buffer = []
 enhanced_ctr = 0
+save_ctr = 0
 
 """ flags """
 timeout_flag = False
@@ -27,13 +28,22 @@ def image_enhance(options):
 
   producer.start()
   enhancer.start()
+  timer.start()
 
   producer.join()
   enhancer.join()
+  timer.join()
+
+  print(save_ctr)
+
+  file = open('stats.txt', 'w+')
+  file.write('# of enhanced images: ' + str(save_ctr))
+  file.close()
 
 def enhance(bright, sharp, contrast, save_loc):
   global enhanced_ctr
   global done_flag
+  global save_ctr
 
   while not timeout_flag and not done_flag:
     with enhanced_ctr_lock:
@@ -61,6 +71,7 @@ def enhance(bright, sharp, contrast, save_loc):
 
       if not timeout_flag:
         enhanced_image.save(f"{save_loc}/{img.filename.rsplit('/', 1)[-1]}")
+        save_ctr += 1
 
 def gif_enhance(bright, sharp, contrast, img):
   new = []
@@ -93,7 +104,8 @@ def produce(location):
 
 def set_timeout_flag(mins):
   global timeout_flag
-  time.sleep(mins*60)
+  # time.sleep(mins*60)
+  time.sleep(1)
   timeout_flag = True
 
 
