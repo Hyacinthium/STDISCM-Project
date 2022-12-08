@@ -1,3 +1,4 @@
+- [#8] - debugged producer deadlock. optimized code.
 - [#7] - timer thread finally working, forced to one second enhancing time (temporary), gitignore images, creation of stats.txt
 - [#6] - enhancer threads now properly terminating and joining
 - [#5] - converted domain_enhancer.py to utilize threading

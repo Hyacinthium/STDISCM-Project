@@ -10,6 +10,7 @@ save_ctr = 0
 """ flags """
 timeout_flag = False
 done_flag = False
+enhancer_states = []
 
 """ semaphores """
 buffer_full = threading.Semaphore(0)
@@ -19,19 +20,25 @@ enhanced_ctr_lock = threading.Semaphore()
 def image_enhance(options):
   timer = threading.Thread(target=set_timeout_flag, args=(options['enhance_time'],))
   producer = threading.Thread(target=produce, args=(options['location'],))
-  enhancer = threading.Thread(target=enhance, args=(
+  enhancers = [threading.Thread(target=enhance, args=(
     options['brightness'], 
     options['sharpness'],
     options['contrast'],
     options['save_loc'],
-  ))
+    i
+  )) for i in range(options['nthreads'])]
 
-  producer.start()
-  enhancer.start()
+  for enhancer in enhancers:
+    enhancer_states.append(False)
+
   timer.start()
-
+  producer.start()
+  for enhancer in enhancers:
+    enhancer.start()
+  
   producer.join()
-  enhancer.join()
+  for enhancer in enhancers:
+    enhancer.join()
   timer.join()
 
   print(save_ctr)
@@ -40,7 +47,7 @@ def image_enhance(options):
   file.write('# of enhanced images: ' + str(save_ctr))
   file.close()
 
-def enhance(bright, sharp, contrast, save_loc):
+def enhance(bright, sharp, contrast, save_loc, index):
   global enhanced_ctr
   global done_flag
   global save_ctr
@@ -49,14 +56,15 @@ def enhance(bright, sharp, contrast, save_loc):
     with enhanced_ctr_lock:
       if enhanced_ctr == 0: 
         done_flag = True
+        canAcquire = False
       else: 
+        canAcquire = True
         enhanced_ctr -= 1
-
-    if not done_flag:
+        
+    if canAcquire:
       buffer_full.acquire()
-      with buffer_lock:
-        img = buffer.pop()
-
+      img, filename = buffer.pop()
+        
       # Brightness
       curr_image = ImageEnhance.Brightness(img)
       enhanced_image = curr_image.enhance(bright)
@@ -70,19 +78,14 @@ def enhance(bright, sharp, contrast, save_loc):
       enhanced_image = curr_image.enhance(contrast)
 
       if not timeout_flag:
-        enhanced_image.save(f"{save_loc}/{img.filename.rsplit('/', 1)[-1]}")
+        enhanced_image.save(f"{save_loc}/{filename}")
         save_ctr += 1
+      else:
+        with enhanced_ctr_lock:
+          enhanced_ctr += 1
 
-def gif_enhance(bright, sharp, contrast, img):
-  new = []
-  for frame in range(0,img.n_frames):
-    img.seek(frame)
-    new_frame = Image.new('RGBA', img.size)
-    new_frame.paste(img)
-    new_frame = enhance(bright, sharp, contrast, new_frame)
-    new.append(new_frame)
-
-  new[0].save('new.gif', append_images=new[1:], save_all=True, duration = img.info['duration'], loop= img.info['loop'])
+  print('thread', index, 'terminated')
+  enhancer_states[index] = True
 
 def produce(location):
   global enhanced_ctr
@@ -91,6 +94,10 @@ def produce(location):
     enhanced_ctr = len(os.listdir(location))
 
   for file in os.listdir(location):
+    if timeout_flag and sum(enhancer_states) == len(enhancer_states):
+      print('stop produce')
+      break
+
     if (
         file.endswith(".png") or 
         file.endswith(".jpg") or 
@@ -98,14 +105,14 @@ def produce(location):
         file.endswith(".gif")
     ):
       image = Image.open(location + '/' + file)
-      with buffer_lock:
-        buffer.append(image)
-        buffer_full.release()
+      filename = image.filename.rsplit('/', 1)[-1]
+      image_copy = image.copy()
+      image.close()
+
+      buffer.append((image_copy, filename))
+      buffer_full.release()
 
 def set_timeout_flag(mins):
   global timeout_flag
-  # time.sleep(mins*60)
-  time.sleep(1)
+  time.sleep(mins*60)
   timeout_flag = True
-
-
