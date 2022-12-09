@@ -1,3 +1,4 @@
+- [#11] - removed buffer_lock.
 - [#10] - pip freeze requirements.
 - [#9] - added save_ctr_lock for save counter increment race condition.
 - [#8] - debugged producer deadlock. optimized code.

@@ -14,7 +14,6 @@ enhancer_states = []
 
 """ semaphores """
 buffer_full = threading.Semaphore(0)
-buffer_lock = threading.Semaphore()
 enhanced_ctr_lock = threading.Semaphore()
 save_ctr_lock = threading.Semaphore()
 
