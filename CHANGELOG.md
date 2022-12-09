@@ -1,3 +1,4 @@
+- [#10] - pip freeze requirements.
 - [#9] - added save_ctr_lock for save counter increment race condition.
 - [#8] - debugged producer deadlock. optimized code.
 - [#7] - timer thread finally working, forced to one second enhancing time (temporary), gitignore images, creation of stats.txt
