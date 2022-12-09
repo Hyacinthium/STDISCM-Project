@@ -16,6 +16,7 @@ enhancer_states = []
 buffer_full = threading.Semaphore(0)
 buffer_lock = threading.Semaphore()
 enhanced_ctr_lock = threading.Semaphore()
+save_ctr_lock = threading.Semaphore()
 
 def image_enhance(options):
   timer = threading.Thread(target=set_timeout_flag, args=(options['enhance_time'],))
@@ -78,8 +79,9 @@ def enhance(bright, sharp, contrast, save_loc, index):
       enhanced_image = curr_image.enhance(contrast)
 
       if not timeout_flag:
-        enhanced_image.save(f"{save_loc}/{filename}")
-        save_ctr += 1
+        with save_ctr_lock:
+          enhanced_image.save(f"{save_loc}/{filename}")
+          save_ctr += 1
       else:
         with enhanced_ctr_lock:
           enhanced_ctr += 1
